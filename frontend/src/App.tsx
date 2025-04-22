@@ -7,6 +7,8 @@ import CheckoutPage from "./pages/CheckoutPage";
 import OrdersPage from "./pages/OrdersPage";
 import PrivateRoute from "./components/PrivateRoute";
 import RegisterPage from "./pages/RegisterPage";
+import AdminRoute from "./components/AdminRoute";
+import AdminProductsPage from "./pages/admin/AdminProductsPage";
 
 const App = () => (
   <>
@@ -23,6 +25,14 @@ const App = () => (
           <PrivateRoute>
             <ProductsPage />
           </PrivateRoute>
+        }
+      />
+      <Route
+        path="/admin/products"
+        element={
+          <AdminRoute>
+            <AdminProductsPage />
+          </AdminRoute>
         }
       />
       <Route

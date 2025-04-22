@@ -7,44 +7,81 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+/**
+ * ------------------------- MODELOS -------------------------
+ */
+
 model User {
-  id            String         @id @default(uuid())
-  email         String         @unique
-  passwordHash  String
-  role          Role           @default(CUSTOMER)
-  createdAt     DateTime       @default(now())
-  carts         Cart[]
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  role         Role     @default(CUSTOMER)
+  createdAt    DateTime @default(now())
+
+  carts  Cart[]
+  orders Order[]
 }
 
 model Product {
   id          String   @id @default(uuid())
   name        String
   description String?
-  price       Decimal  @db.Decimal(10,2)   // <── aquí
+  price       Decimal  @db.Decimal(10, 2)
   stock       Int
+  imageUrl    String?
   createdAt   DateTime @default(now())
-  cartItems   CartItem[]
+
+  cartItems  CartItem[]
+  orderItems OrderItem[]
 }
 
 model Cart {
-  id        String      @id @default(uuid())
-  user      User        @relation(fields: [userId], references: [id])
+  id        String     @id @default(uuid())
+  user      User       @relation(fields: [userId], references: [id])
   userId    String
-  status    CartStatus  @default(OPEN)
-  items     CartItem[]
-  createdAt DateTime    @default(now())
+  status    CartStatus @default(OPEN)
+  createdAt DateTime   @default(now())
+
+  items CartItem[]
 }
 
 model CartItem {
-  cart       Cart    @relation(fields: [cartId], references: [id])
-  cartId     String
-  product    Product @relation(fields: [productId], references: [id])
-  productId  String
-  quantity   Int
-  unitPrice  Decimal @db.Decimal(10,2)     // <── y aquí
+  cart      Cart    @relation(fields: [cartId], references: [id])
+  cartId    String
+  product   Product @relation(fields: [productId], references: [id])
+  productId String
+  quantity  Int
+  unitPrice Decimal @db.Decimal(10, 2)
 
-  @@id([cartId, productId])
+  @@id([cartId, productId]) // PK compuesta
 }
+
+model Order {
+  id          String      @id @default(uuid())
+  user        User        @relation(fields: [userId], references: [id])
+  userId      String
+  totalAmount Decimal     @db.Decimal(12, 2)
+  status      OrderStatus // enum opcional para mayor consistencia
+  paymentRef  String
+  createdAt   DateTime    @default(now())
+
+  items OrderItem[]
+}
+
+model OrderItem {
+  order     Order   @relation(fields: [orderId], references: [id])
+  orderId   String
+  product   Product @relation(fields: [productId], references: [id])
+  productId String
+  quantity  Int
+  unitPrice Decimal @db.Decimal(10, 2)
+
+  @@id([orderId, productId]) // PK compuesta
+}
+
+/**
+ * ------------------------- ENUMS -------------------------
+ */
 
 enum Role {
   CUSTOMER
@@ -54,4 +91,13 @@ enum Role {
 enum CartStatus {
   OPEN
   CHECKED_OUT
+}
+
+/**
+ * opcional
+ */
+enum OrderStatus {
+  PAID
+  CANCELED
+  REFUNDED
 }

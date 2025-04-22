@@ -26,6 +26,7 @@ const NavBar = () => {
             <Link to="/register">Registro</Link>
           </>
         )}
+        {user?.role === "ADMIN" && <Link to="/admin/products">Admin</Link>}
         <button onClick={toggle}>{theme === "light" ? "🌙" : "☀️"}</button>
       </div>
     </nav>

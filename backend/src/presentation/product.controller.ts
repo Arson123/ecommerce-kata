@@ -1,44 +1,58 @@
-import { Router, Response } from "express";
-import asyncHandler from "express-async-handler";
+import { Router } from "express";
 import { z } from "zod";
-import { Role } from "@prisma/client";
+import asyncHandler from "express-async-handler";
 import { ProductService } from "../application/services/product.service";
-import { authGuard } from "../shared/middleware/auth.middleware";
-import { roleGuard } from "../shared/middleware/role.guard";
-import { AuthRequest } from "../shared/middleware/auth.middleware";
+import { roleGuard, jwtGuard } from "../shared/middleware/guards";
 
 const router = Router();
-const productService = new ProductService();
+const svc = new ProductService();
 
-/** validación */
-const productDto = z.object({
-  name: z.string(),
-  price: z.number().positive(),
-  stock: z.number().int().nonnegative(),
-  description: z.string().nullable().optional(),
+const productSchema = z.object({
+  name: z.string().min(2),
+  description: z.string().optional(),
+  price: z.coerce.number().positive(),
+  stock: z.coerce.number().int().nonnegative(),
+  imageUrl: z.string().url().or(z.literal("")).optional(),
 });
 
+// GET /products  (público)
 router.get(
   "/",
-  asyncHandler(async (req, res: Response): Promise<void> => {
-    const page = +(req.query.page ?? 1);
-    const size = +(req.query.size ?? 10);
-    const products = await productService.list(page, size);
-    res.json(products);
+  asyncHandler(async (_req, res) => {
+    res.json(await svc.list());
   })
 );
 
+// POST /products  (ADMIN)
 router.post(
   "/",
-  authGuard,
-  roleGuard(Role.ADMIN),
-  asyncHandler(async (req: AuthRequest, res: Response): Promise<void> => {
-    const dto = productDto.parse(req.body);
-    const product = await productService.create({
-      ...dto,
-      description: dto.description ?? null,
-    });
-    res.status(201).json(product);
+  jwtGuard,
+  roleGuard(["ADMIN"]),
+  asyncHandler(async (req, res) => {
+    const data = productSchema.parse(req.body);
+    res.status(201).json(await svc.create(data));
+  })
+);
+
+// PUT /products/:id  (ADMIN)
+router.put(
+  "/:id",
+  jwtGuard,
+  roleGuard(["ADMIN"]),
+  asyncHandler(async (req, res) => {
+    const data = productSchema.partial().parse(req.body);
+    res.json(await svc.update(req.params.id, data));
+  })
+);
+
+// DELETE /products/:id  (ADMIN)
+router.delete(
+  "/:id",
+  jwtGuard,
+  roleGuard(["ADMIN"]),
+  asyncHandler(async (req, res) => {
+    await svc.remove(req.params.id);
+    res.status(204).end();
   })
 );
 

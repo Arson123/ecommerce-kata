@@ -1,15 +1,19 @@
 export interface Product {
-  id: number;
+  id: string;
   name: string;
-  description: string;
+  description?: string;
   price: number;
-  imageUrl: string;
+  stock: number;
+  imageUrl?: string;
 }
 
+export type Role = "CUSTOMER" | "ADMIN";
+
 export interface User {
-  id: number;
-  name: string;
+  id: string;
   email: string;
+  role: Role;
+  name?: string;
 }
 
 export interface CartItem {
