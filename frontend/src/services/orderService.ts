@@ -13,4 +13,8 @@ export const orderService = {
     const { data } = await api.get<Order[]>("/orders");
     return data;
   },
+  async checkout() {
+    const { data } = await api.post("/orders/checkout");
+    return data as { message: string; paymentRef: string; total: number };
+  },
 };

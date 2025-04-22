@@ -7,7 +7,6 @@ import { MyJwt } from "../types/express";
 const router = Router();
 const prisma = new PrismaClient(); 
 
-/* ---------------- historial del usuario ---------------- */
 router.get(
   "/",
   jwtGuard,
@@ -22,7 +21,6 @@ router.get(
   })
 );
 
-/* ---------------------- checkout ----------------------- */
 router.post(
   "/checkout",
   jwtGuard,
@@ -51,7 +49,8 @@ router.post(
       message: "Pago aprobado",
       paymentRef,
       total: total.toNumber(),
-    });
+      items: cart.items,
+    });    
   })
 );
 
