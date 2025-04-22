@@ -1,0 +1,21 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* --------  Paleta Davivienda  -------- */
+:root {
+  --color-primary: #ed1c24;
+  --color-secondary: #f7c331;
+  --color-accent: #ffffff;
+}
+
+/* Tema oscuro opcional */
+[data-theme="dark"] {
+  --color-primary: #1e293b;
+  --color-secondary: #475569;
+  --color-accent: #10b981;
+}
+
+body {
+  @apply bg-accent text-primary;
+}
